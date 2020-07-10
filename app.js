@@ -2,24 +2,16 @@
 
 
 
-/**
- * VARIABLES
- */
+/*
+** DECLARATIONS
+*/
 
-
-const overlay = document.getElementById( "overlay" );
-const artwork = document.getElementById( "artwork" );
-const title = document.getElementById( "title" );
-const artist = document.getElementById( "artist" );
-const links = document.getElementsByClassName( "link" );
-
+const canvas = document.getElementById( "threejs" );
 
 const manager = new THREE.LoadingManager();
 const scene = new THREE.Scene;
 const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, .1, 400 );
-const canvas = document.getElementById( "universe" );
 const renderer = new THREE.WebGLRenderer( {
-
     canvas: canvas,
     antialias: false,
     alpha: true,
@@ -32,7 +24,6 @@ const raycaster = new THREE.Raycaster;
 let mouseVector = new THREE.Vector2;
 let items = new THREE.Group;
 
-
 let item = null;
 let selection = null;
 let rendering = false;
@@ -42,58 +33,24 @@ let colorState = null;
 let followSpaceship = false;
 
 
-/**
- * FUNCTIONS
- */
 
+/*
+** FUNCTIONS
+*/
 
-function getSrc( url ) {
-
-    const split = url.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/);
-    const host = split[ 3 ];
-    const query = split[ 6 ];
-    if( host === 'music.apple.com' ){
-
-        return host + query.substr( 5 );
-    } else {
-
-        return host;
-    } 
-}
-
-
+// Render the current frame, update orbitcontrols.js position, request next frame
 function render(){
 
-
-    // const zoom = controls.target.distanceTo( controls.object.position );
-    // console.log( ( ( 100 - zoom ) / 100 )  );
-    // controls.rotateSpeed = ( 100 - zoom ) / 100;
-    
     controls.update();
     renderer.render( scene, camera );
     requestAnimationFrame( render );
-
 }
 
 
-function addSprite( id, x, y, z ) {
-
-    const material = new THREE.SpriteMaterial( {
-
-        color: 0xFFFFFF,
-        map: textureLoader.load( "/img/item/" + id + ".jpg" )
-    } );
-    const sprite = new THREE.Sprite( material );
-    sprite.position.set( x, y, z );
-    sprite.name = id;
-    sprite.scale.set( .7, .7, 1 );
-    scene.add( sprite );
-}
-
-
+// Cast a ray in world space, check if ray intersects with object
 function getHit( e ){
 
-    /* Fix Android/iOS different clientX/clientY path */
+    // Fix Android/iOS clientX/clientY path differences
     let x = e.clientX;
     let y = e.clientY;
     null == x && ( x = e.touches.clientX ),
@@ -101,13 +58,12 @@ function getHit( e ){
     null == x && ( x = e.changedTouches[0].clientX ),
     null == y && ( y = e.changedTouches[0].clientY );
 
-    /* return first intersecting object */
+    // Return first intersecting object or null
     x = x / window.innerWidth * 2 - 1;
     y = -y / window.innerHeight * 2 + 1;
     mouseVector.set( x, y );
     raycaster.setFromCamera( mouseVector, camera );
     const hit = raycaster.intersectObject( items, true )[ 0 ];
-
     if( hit ){
 
         return hit.object;      
@@ -118,7 +74,7 @@ function getHit( e ){
 }
 
 
-
+// When a user presses down on touchscreen/mouse button, etc
 function onDown ( e ) {
 
     move = false;
@@ -135,6 +91,7 @@ function onDown ( e ) {
 }
 
 
+// When a user moves finger on touchscreen/moves mouse, etc
 function onMove () {
     
     if ( !move && moveTrigger === 10 ) {
@@ -151,28 +108,23 @@ function onMove () {
 }
 
 
+// When a user puts his finger up from touchscreen, mouse button, etc
 function onUp ( e ) {
-    
     e.preventDefault();
     if ( item !== null ) {
-
         /*if ( item === selection) {
 
         } else {
 
             console.log( 'not open' );
         }*/
-
         if ( item.parent.name === 'Spaceship' ) {
-
             followSpaceship = true;
         } else {
-
             followSpaceship = false;
             const pos = item.parent.position;
             controls.target.set( pos.x, pos.y, pos.z );
         }
-
         item.material.color = colorState;
         selection = item;
         colorState = null;
@@ -181,6 +133,7 @@ function onUp ( e ) {
 }
 
 
+// Calls preventDefault() and stopPropagation() when user tries to zoom/dolly
 function preventZoom( e ){
 
     let n;
@@ -191,14 +144,16 @@ function preventZoom( e ){
 }
 
 
-function addArrow( origin, direction, length, color ){
+// Display an arrow
+function displayTransformArrow( origin, direction, length, color ){
 
     const arrow = new THREE.ArrowHelper( origin, direction, length, color, .04, .02 );
     scene.add( arrow );
 }
 
 
-function addCD( texture, pos ){
+// Load "CD" 3D Model from GLTF file (UV mapped), create Material from Texture (UV mapped), apply Material to 3D Model, add to "items" group
+function displayCD( texture, pos ){
 
     const t = textureLoader.load( texture );
     t.flipY = false;
@@ -215,19 +170,7 @@ function addCD( texture, pos ){
 }
 
 
-
-/**
- * PROGRAM-CODE
- */
-
-
-if ( window.location.hash ) {
-    
-    show( window.location.hash );
-};
-
-
-/* configure three.js */
+// Basic "three.js" and "orbitcontrols.js" configuration
 scene.background = null;
 camera.position.set( 0, 0, 4 );
 renderer.setPixelRatio( window.devicePixelRatio );
@@ -247,7 +190,7 @@ controls.autoRotate = true;
 controls.autoRotateSpeed = .5;
 
 
-/* insert 3D model (from .gltf format) */
+// Load and display "ILL" 3D Model from GLTF file format
 gltfLoader.load( "./3d/ill.glb", function ( gltf ) {
 
     const mesh = gltf.scene.children[ 0 ];
@@ -260,54 +203,49 @@ gltfLoader.load( "./3d/ill.glb", function ( gltf ) {
 } );
 
 
-/* insert artwork-sprites */
-/*let keys = [];
-for( let k in db ) keys.push( k );
-for( let i = 0; i < keys.length; i++ ){
+// Load and display "Spaceship" 3D Model from GLTF file format
+gltfLoader.load( "./3d/ship.glb", function ( gltf ) {
 
-    const id = keys[ i ];
-    const xyz = db[ id ].xyz;
-    addSprite( id, xyz[ 0 ], xyz[ 1 ], xyz[ 2 ] );
-}*/
-// scene.add( sprites );
+    spaceship = gltf.scene.children[ 0 ];
+    const material = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe: true } );
+    for( let i = 0; i < spaceship.children.length; i++ ){
+
+        spaceship.children[ i ].material = material;
+    }
+    items.add( spaceship );
+} );
 
 
-
-/* when all loaders have finished, start rendering and fade loading-screen */
+// When all loaders have finished, start rendering and fade loading-screen
 manager.onLoad = function () {
 
-    if ( rendering != true ) { 
-        
+    if ( rendering != true ) {
+
         render(); 
     };
     rendering = true;
     setInterval( rotateItems, 10 );
     setInterval( moveSpaceship, 10 );
     loading.classList.add( "fadeout" );
-    loading.addEventListener( "transitionend", function ( e ) {
+    loading.addEventListener( "transitionend", function () {
 
         loading.classList.add( "hidden" );
     } );
 };
 
 
-/* add polar grid */
+// Display Polar-Grid
 const polarGrid = new THREE.PolarGridHelper( 100, 8, 1, 1, 0x444444, 0xAA4444 );
 scene.add( polarGrid );
 
 
-/* add position arrows in "ill" logo */
-addArrow( { x: 1, y: 0, z: 0 }, { x: 0, y: .1, z: 0 }, .6, 0xff0000 );
-addArrow( { x: 0, y: 1, z: 0 }, { x: 0, y: .1, z: 0 }, .6, 0x00ff00 );
-addArrow( { x: 0, y: 0, z: 1 }, { x: 0, y: .1, z: 0 }, .6, 0x00aaff );
+// Display transform arrows on "ILL" logo
+displayTransformArrow( { x: 1, y: 0, z: 0 }, { x: 0, y: .1, z: 0 }, .6, 0xff0000 );
+displayTransformArrow( { x: 0, y: 1, z: 0 }, { x: 0, y: .1, z: 0 }, .6, 0x00ff00 );
+displayTransformArrow( { x: 0, y: 0, z: 1 }, { x: 0, y: .1, z: 0 }, .6, 0x00aaff );
 
 
-
-
-
-
-
-/* move spaceship along spline-path */
+// Add Catmull-Rom spline (for "Spaceship" to fly along)
 let counter = 0;
 let spaceship;
 const curve = new THREE.CatmullRomCurve3( [
@@ -326,55 +264,17 @@ const curve = new THREE.CatmullRomCurve3( [
     new THREE.Vector3( -30, -15, 45 ),
     new THREE.Vector3( 0, 0, 90 ),
 ], true, 'catmullrom', .8 );
-/* make spline-curve visible (NOT needed for animation) */
-// const path = curve.getPoints( 1000 );
-// const geometry = new THREE.BufferGeometry().setFromPoints( path );
-// const material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
-// const curveObject = new THREE.Line( geometry, material );
-// scene.add( curveObject );
-
-gltfLoader.load( "./3d/ship.glb", function ( gltf ) {
-
-    spaceship = gltf.scene.children[ 0 ];
-    const material = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe: true } );
-    for( let i = 0; i < spaceship.children.length; i++ ){
-
-        spaceship.children[ i ].material = material;
-    }
-    items.add( spaceship );
-} );
 
 
+// Display Catmull-Rom spline (not needed for "Spaceship" to fly along)
+/* const path = curve.getPoints( 1000 );
+const geometry = new THREE.BufferGeometry().setFromPoints( path );
+const material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+const curveObject = new THREE.Line( geometry, material );
+scene.add( curveObject );*/
 
 
-/* add CDs */
-addCD( '/img/cd/mnis.jpg', { x: -6, y: -2, z: -7 } );
-addCD( '/img/cd/smns.jpg', { x: 6, y: 2, z: -9 } );
-addCD( '/img/cd/mmas.jpg', { x: 0, y: 1, z: 8 } );
-addCD( '/img/cd/bangarang.jpg', { x: 6, y: -2, z: 4 } );
-addCD( '/img/cd/leaving.jpg', { x: 3, y: -7, z: 5 } );
-addCD( '/img/cd/middlefinger.jpg', { x: 3, y: -2, z: 8 } );
-addCD( '/img/cd/middlefinger2.jpg', { x: -3, y: -8, z: 9 } );
-addCD( '/img/cd/recess.jpg', { x: 4, y: 7, z: -6 } );
-addCD( '/img/cd/jacku.jpg', { x: 7, y: 7, z: -1 } );
-addCD( '/img/cd/totl.jpg', { x: 6, y: 9, z: 4 } );
-addCD( '/img/cd/showtracks.jpg', { x: -5, y: 6, z: -7 } );
-
-
-/* rotate children of 'items' (group) except the first two ( ill, spaceship ) */
-function rotateItems() {
-
-    for ( let i = 2; i < items.children.length; i++ ) {
-    
-        if ( items.children[ i ].children[ 0 ] !== selection ) {
-
-            items.children[ i ].rotation.y += .01; 
-        }     
-    }
-};
-
-
- 
+// Make "Spaceship" fly along the Catmull-Rom spline 
 function moveSpaceship() {
 
     if ( counter <= .9999 ) {
@@ -388,27 +288,46 @@ function moveSpaceship() {
         };
     } else {
 
-      counter = 0;
+        counter = 0;
     };
 };
 
 
+// Display CDs
+displayCD( '/img/cd/mnis.jpg', { x: -6, y: -2, z: -7 } );
+displayCD( '/img/cd/smns.jpg', { x: 6, y: 2, z: -9 } );
+displayCD( '/img/cd/mmas.jpg', { x: 0, y: 1, z: 8 } );
+displayCD( '/img/cd/bangarang.jpg', { x: 6, y: -2, z: 4 } );
+displayCD( '/img/cd/leaving.jpg', { x: 3, y: -7, z: 5 } );
+displayCD( '/img/cd/middlefinger.jpg', { x: 3, y: -2, z: 8 } );
+displayCD( '/img/cd/middlefinger2.jpg', { x: -3, y: -8, z: 9 } );
+displayCD( '/img/cd/recess.jpg', { x: 4, y: 7, z: -6 } );
+displayCD( '/img/cd/jacku.jpg', { x: 7, y: 7, z: -1 } );
+displayCD( '/img/cd/totl.jpg', { x: 6, y: 9, z: 4 } );
+displayCD( '/img/cd/showtracks.jpg', { x: -5, y: 6, z: -7 } );
 
 
+// Rotate all children of "items" group except the first two ( "ILL" and "Spaceship" should not rotate ) */
+function rotateItems() {
 
-/* add items (group) */
+    for ( let i = 2; i < items.children.length; i++ ) {
+
+        if ( items.children[ i ].children[ 0 ] !== selection ) {
+
+            items.children[ i ].rotation.y += .01; 
+        }     
+    }
+};
+
+
+// Display "items" group
 scene.add( items );
 
 
 
-
-
-
-
-/**
- * EVENT-LISTENERS
- */
-
+/*
+** EVENT-LISTENERS
+*/
 
 window.addEventListener( "resize", function(){
 
@@ -417,21 +336,21 @@ window.addEventListener( "resize", function(){
     camera.updateProjectionMatrix();
 }, false);
 
+canvas.addEventListener( "mousedown", function( e ){ 
 
-canvas.addEventListener( "mousedown", function( e ){ onDown( e ); }, false );
+    onDown( e );
+}, false );
 canvas.addEventListener( "mousemove", onMove, false );
-canvas.addEventListener( "mouseup", function( e ){ move || onUp( e ); }, false );
-canvas.addEventListener( "touchstart", function( e ){ onDown( e ); }, false );
+canvas.addEventListener( "mouseup", function( e ){ 
+    
+    move || onUp( e ); 
+}, false );
+canvas.addEventListener( "touchstart", function( e ){
+    
+    onDown( e );
+}, false );
 canvas.addEventListener( "touchmove", onMove, false );
-canvas.addEventListener( "touchend", function( e ){ move || onUp( e ); }, false );
-
-
-overlay.addEventListener( "mousemove", preventZoom, false );
-overlay.addEventListener( "mouseup", preventZoom, false );
-overlay.addEventListener( "contextmenu", preventZoom, false );
-overlay.addEventListener( "mousedown", preventZoom, false );
-overlay.addEventListener( "wheel", preventZoom, false );
-overlay.addEventListener( "touchstart", preventZoom, false );
-overlay.addEventListener( "touchend", preventZoom, false );
-overlay.addEventListener( "touchmove", preventZoom, false );
-overlay.addEventListener( "keydown", preventZoom, false );
+canvas.addEventListener( "touchend", function( e ){ 
+    
+    move || onUp( e );
+}, false );
