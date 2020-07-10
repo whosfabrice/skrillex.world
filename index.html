@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="revised" content="200404"/>
+    <meta name="keywords" content="Skrillex"/>
+    <meta name="description" content="Skrillex World"/>
+    <title>Skrillex World</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <canvas id="universe"></canvas>
+
+    <section id="overlay" class="hidden">
+        <img id="artwork" src="#">
+        <h2 id="title"></h2>
+        <h3 id="artist"></h3>
+        <a class="link hidden" href="#" target="_blank"><img src="#"><button></button></a>
+        <a class="link hidden" href="#" target="_blank"><img src="#"><button></button></a>
+        <a class="link hidden" href="#" target="_blank"><img src="#"><button></button></a>
+        <a class="link hidden" href="#" target="_blank"><img src="#"><button></button></a>
+        <a class="link hidden" href="#" target="_blank"><img src="#"><button></button></a>
+        <a class="link hidden" href="#" target="_blank"><img src="#"><button></button></a>
+        <a class="link hidden" href="#" target="_blank"><img src="#"><button></button></a>
+        <a class="link hidden" href="#" target="_blank"><img src="#"><button></button></a>
+    </section>
+
+    <section id="loading" class="">
+        <svg viewBox="0 0 278 1000" fill="#FFF">
+            <path d="M41.181,71.611L2.369,143.039L2.369,256.013C2.369,318.149 1.822,434.767 1.093,515.124L0,661.443L80.722,661.443L80.722,330.722C80.722,148.87 80.539,0 80.357,0C79.993,0 62.318,32.252 41.181,71.611Z"/>
+            <path d="M121.356,96.028L98.943,96.757L98.943,508.746C98.943,735.423 99.308,920.372 99.672,920.007C100.219,919.643 118.258,887.755 139.759,849.308L179.118,779.519L179.118,94.752L161.443,95.117C151.603,95.299 133.564,95.845 121.356,96.028Z"/>
+            <path d="M196.611,501.458C195.882,684.22 195.517,870.991 195.882,916.91L196.429,1000L237.063,920.19L277.515,840.561L277.515,169.461L237.609,169.461L197.704,169.461L196.611,501.458Z"/>
+        </svg>
+    </section>
+
+    <span id="data1">Rgb32/64 :0/0<br><br>Rendering:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ms/sec:<span id="data1update"></span><br><br><br><br>Rgb32/64 :0/0</span>
+    <span id="data2">Movable 2 MeshGen:63Ms.&nbsp;&nbsp;Update[S]:0.<span id="data2update">1</span>ms&nbsp;&nbsp;txCached:37</span>
+    <span id="data3">Cpu&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:<span id="data3update">61</span></span>
+
+    <script>
+        function prevent( e ){
+
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        const loading = document.getElementById( 'loading' );
+        loading.addEventListener( "mousemove", prevent, false );
+        loading.addEventListener( "mouseup", prevent, false );
+        loading.addEventListener( "contextmenu", prevent, false );
+        loading.addEventListener( "mousedown", prevent, false );
+        loading.addEventListener( "wheel", prevent, false );
+        loading.addEventListener( "touchstart", prevent, false );
+        loading.addEventListener( "touchend", prevent, false );
+        loading.addEventListener( "touchmove", prevent, false );
+        loading.addEventListener( "keydown", prevent, false );
+
+        const data1update = document.getElementById( 'data1update' );
+        setInterval( function() {
+
+            if ( data1update.textContent.length > 5 ) { data1update.textContent = ""; }
+            else { data1update.textContent += "."; }
+        }, 500);
+
+        const data2update = document.getElementById( 'data2update' );
+        setInterval( function(){ data2update.textContent = Math.ceil(Math.random() * 9); }, 200 );
+
+        const data3update = document.getElementById( 'data3update' );
+        setInterval( function(){ data3update.textContent = Math.ceil(Math.random() * 100); }, 700 );
+    </script>
+
+    <script src="/js/three.min.js?v=1"></script>
+    <script src="/js/GLTFLoader.min.js?v=1"></script>
+    <script src="/js/OrbitControls.min.js?v=1"></script>
+    <script src="/db.js?v=1"></script>
+    <script src="/app.js?v=1"></script>
+
+</body>
+</html>
