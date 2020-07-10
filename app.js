@@ -12,6 +12,7 @@ const manager = new THREE.LoadingManager();
 const scene = new THREE.Scene;
 const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, .1, 400 );
 const renderer = new THREE.WebGLRenderer( {
+
     canvas: canvas,
     antialias: false,
     alpha: true,
